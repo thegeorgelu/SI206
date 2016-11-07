@@ -12,4 +12,9 @@
 # Make sure the new page is uploaded to your GitHub account.
 
 
-# writing a comment for fun
+import requests
+from bs4 import BeautifulSoup
+
+base_url = 'http://www.nytimes.com'
+r = requests.get(base_url)
+soup = BeautifulSoup(r.text, "lxml")
