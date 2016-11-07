@@ -15,6 +15,15 @@
 import requests
 from bs4 import BeautifulSoup
 
-base_url = 'http://www.nytimes.com'
+base_url = 'http://collemc.people.si.umich.edu/data/bshw3StarterFile.html'
 r = requests.get(base_url)
 soup = BeautifulSoup(r.text, "lxml")
+
+picture = soup.find_all('img')
+# picture = soup.find_all('div', {'class': 'field-item even'})
+
+print(picture)
+
+
+
+fout = open("index.html", 'w')
