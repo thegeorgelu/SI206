@@ -50,3 +50,7 @@ avg_polarity = total_polarity / tweet_count
 print()
 print("Average subjectivity is", avg_subjectivity)
 print("Average polarity is", avg_polarity)
+
+
+
+

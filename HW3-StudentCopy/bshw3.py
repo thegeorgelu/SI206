@@ -23,7 +23,7 @@ soup = BeautifulSoup(r.text, 'html.parser')
 html_text = soup.prettify() # turns it into a string and formatted like html
 # print(html_text)
 html_text = html_text.replace('student', 'AMAZING student')
-html_text = html_text.replace('https://testbed.files.wordpress.com/2012/09/bsi_exposition_041316_192.jpg', 'Linkedin.jpg')
+html_text = html_text.replace('https://testbed.files.wordpress.com/2012/09/bsi_exposition_041316_192.jpg', 'images/Linkedin.jpg')
 html_text = html_text.replace('logo2.png', 'media/logo.png')
 # print(html_text)
 
