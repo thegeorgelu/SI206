@@ -45,7 +45,6 @@ substitution_probabilities = {"NN":.15,"RB":.1,"VB":.1,"JJ":.1,"CC":.1}
 
 final_words = []
 
-
 for (word, tag) in tagged_tokens:
 	if tag not in substitution_probabilities or random.random() > substitution_probabilities[tag]:
 		final_words.append(spaced(word))
