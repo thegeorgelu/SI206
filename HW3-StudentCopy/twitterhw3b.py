@@ -26,23 +26,26 @@ api = tweepy.API(auth)
 public_tweets = api.search('Golden State Warriors')
 
 
-avg_subjectivity = 0.0
-avg_polarity = 0.0
+total_subjectivity = 0.0
+total_polarity = 0.0
+tweet_count = 0
 
 for tweet in public_tweets:
 	print(tweet.text)
 	analysis = TextBlob(tweet.text)
 	# print(analysis.sentiment)
 	# print(analysis.sentiment.polarity)
-	avg_subjectivity += analysis.sentiment.subjectivity
-	avg_polarity += analysis.sentiment.polarity
-
+	total_subjectivity += analysis.sentiment.subjectivity
+	total_polarity += analysis.sentiment.polarity
+	tweet_count += 1
 
 #polarity -- measures how positive or negative
 #subjectivity -- measures how factual.
 
 #1 Sentiment Analysis - Understand and Extracting Feelings from Data
 
+avg_subjectivity = total_subjectivity / tweet_count
+avg_polarity = total_polarity / tweet_count
 
 print()
 print("Average subjectivity is", avg_subjectivity)
