@@ -2,10 +2,10 @@ import tweepy
 from textblob import TextBlob
 
 # Unique code from Twitter
-access_token = "YOUR CODE HERE"
-access_token_secret = "YOUR CODE HERE"
-consumer_key = "YOUR CODE HERE"
-consumer_secret = "YOUR CODE HERE"
+access_token = "232431314-h0uMw0glf8huuGREFviPQGVvUO8dEe1cObsVhUaO"
+access_token_secret = "yPtYHFyEN3r3xkGSfJvRmbjor2gXbmbgKIjwdPhQqvctp"
+consumer_key = "KdX3Wf20wCRdU6QYqbPz8vXO3"
+consumer_secret = "wJkKUTfriRMJjWK8kf3pBDErDL6cxZCuamWLIwSPlP9jbpmV3F"
 
 # Boilerplate code here
 auth = tweepy.OAuthHandler(consumer_key,consumer_secret)

@@ -23,7 +23,7 @@ auth.set_access_token(access_token,access_token_secret)
 api = tweepy.API(auth)
 #Now we can Create Tweets, Delete Tweets, and Find Twitter Users
 
-public_tweets = api.search('Golden State Warriors')
+public_tweets = api.search('Donald Trump')
 
 
 total_subjectivity = 0.0

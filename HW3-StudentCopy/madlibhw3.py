@@ -41,7 +41,7 @@ tagged_tokens = nltk.pos_tag(tokens) # gives us a tagged list of tuples
 # 		print (tup)
 
 tagmap = {"NN":"a noun","RB":"an adverb","VB":"a verb","JJ":"an adjective", "CC":"a coordinating conjunction"}
-substitution_probabilities = {"NN":.15,"RB":.1,"VB":.1,"JJ":.1,"CC":.1}
+substitution_probabilities = {"NN":.35,"RB":.1,"VB":.1,"JJ":.1,"CC":.1}
 
 final_words = []
 
