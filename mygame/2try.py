@@ -26,6 +26,16 @@ display_height = 800
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption("Try Game")
 
+
+class Player(object):
+	def __init__(self):
+		self.x_pos = 0
+		self.y_pos = 0
+		self.rect = pygame.Rect(self.x_pos, self.y_pos, 20, 20)
+	def move(self, x, y):
+		self.x_pos += x
+		self.y_pos += y
+		
 class Enemy(Sprite):
 	def __init__(self):
 		Sprite.__init__(self)
@@ -37,10 +47,11 @@ class Enemy(Sprite):
 		randX = randint(0, display_width - 50)
 		randY = randint(0, display_height - 50)
 		self.rect.center = (randX ,randY)
+		
+	# def hit(self, target):
+		# return self.rect.colliderect(target)
 
-	def hit(self, target):
-        return self.rect.colliderect(target)
-
+player = Player()
 enemy = Enemy()
 enemy_list = []
 enemy_list.append(enemy)
@@ -58,10 +69,9 @@ while not gameExit:
 			gameExit = True
 
 	for enemy in enemy_list:
-		if enemy.rect.colliderect():
+		if enemy.rect.colliderect(player):
 			mixer.Sound("cha-ching.wav").play()
 			enemy.move()
-			hits += 1
 
 	if event.type == pygame.KEYDOWN:
 		x_delta = 0
@@ -75,19 +85,19 @@ while not gameExit:
 		if event.key == pygame.K_DOWN:
 			y_delta += 10
 	
-	x_pos += x_delta
-	y_pos += y_delta
-	if x_pos < 0:
-		x_pos = 780
-	elif x_pos > 800:
-		x_pos = 0
-	if y_pos < 0:
-		y_pos = 780
-	elif y_pos > 800:
-		y_pos = 0
+	player.x_pos += x_delta
+	player.y_pos += y_delta
+	if player.x_pos < 0:
+		player.x_pos = 780
+	elif player.x_pos > 800:
+		player.x_pos = 0
+	if player.y_pos < 0:
+		player.y_pos = 780
+	elif player.y_pos > 800:
+		player.y_pos = 0
 
 	
-	gameDisplay.fill(blue, rect=[x_pos,y_pos, 20, 20])
+	# gameDisplay.fill(blue, rect=[x_pos,y_pos, 20, 20])
 	if len(enemy_list) < 5 and randint(0, 50) == 5:
 		enemy_list.append(Enemy())
 		sprites = RenderPlain(enemy_list)
@@ -105,6 +115,7 @@ while not gameExit:
 
 	sprites.update()
 	sprites.draw(gameDisplay)
+	pygame.draw.rect(gameDisplay, (255, 200, 0), player.rect)
 	pygame.display.update()
 	clock.tick(60)
 
