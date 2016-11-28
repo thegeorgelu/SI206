@@ -39,7 +39,7 @@ class Enemy(Sprite):
 		self.rect.center = (randX ,randY)
 
 	def hit(self, target):
-        return self.rect.colliderect(target)
+		return self.rect.colliderect(target)
 
 enemy = Enemy()
 enemy_list = []
@@ -57,11 +57,9 @@ while not gameExit:
 		if event.type == pygame.QUIT:
 			gameExit = True
 
-	for enemy in enemy_list:
-		if enemy.rect.colliderect():
-			mixer.Sound("cha-ching.wav").play()
-			enemy.move()
-			hits += 1
+	# for enemy in enemy_list:
+	# 		mixer.Sound("cha-ching.wav").play()
+	# 		enemy.move()
 
 	if event.type == pygame.KEYDOWN:
 		x_delta = 0

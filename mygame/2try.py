@@ -31,25 +31,33 @@ class Player(object):
 	def __init__(self):
 		self.x_pos = 0
 		self.y_pos = 0
-		self.rect = pygame.Rect(self.x_pos, self.y_pos, 20, 20)
+		self.length = 20
+		self.width = 20
+		self.rect = pygame.Rect(self.x_pos, self.y_pos, self.length, self.width)
 	def move(self, x, y):
 		self.x_pos += x
 		self.y_pos += y
-		
+
 class Enemy(Sprite):
 	def __init__(self):
 		Sprite.__init__(self)
-		self.image = image.load("poop.bmp").convert_alpha()
-		self.rect = self.image.get_rect()
+		# self.image = image.load("poop.bmp").convert_alpha()
+		# self.rect = self.image.get_rect()
+		self.x_pos = 50
+		self.y_pos = 50
+		self.length = 20
+		self.width = 20
+		self.rect = pygame.Rect(self.x_pos, self.y_pos, self.length, self.width)
 
 	# move gold to a new random location
 	def move(self):
 		randX = randint(0, display_width - 50)
 		randY = randint(0, display_height - 50)
-		self.rect.center = (randX ,randY)
+		# self.rect.center = (randX ,randY)
+
+		self.x_pos = randX
+		self.y_pos = randY
 		
-	# def hit(self, target):
-		# return self.rect.colliderect(target)
 
 player = Player()
 enemy = Enemy()
@@ -68,22 +76,24 @@ while not gameExit:
 		if event.type == pygame.QUIT:
 			gameExit = True
 
-	for enemy in enemy_list:
-		if enemy.rect.colliderect(player):
-			mixer.Sound("cha-ching.wav").play()
-			enemy.move()
+		for enemy in enemy_list:
+			if enemy.rect.colliderect(player):
+				print("woah!")
+				mixer.Sound("cha-ching.wav").play()
+				enemy.move()
 
-	if event.type == pygame.KEYDOWN:
-		x_delta = 0
-		y_delta = 0
-		if event.key == pygame.K_LEFT:
-			x_delta -= 10
-		if event.key == pygame.K_RIGHT:
-			x_delta += 10
-		if event.key == pygame.K_UP:
-			y_delta -= 10
-		if event.key == pygame.K_DOWN:
-			y_delta += 10
+		if event.type == pygame.KEYDOWN:
+			print(event.key)
+			x_delta = 0
+			y_delta = 0
+			if event.key == pygame.K_LEFT:
+				x_delta -= 10
+			if event.key == pygame.K_RIGHT:
+				x_delta += 10
+			if event.key == pygame.K_UP:
+				y_delta -= 10
+			if event.key == pygame.K_DOWN:
+				y_delta += 10
 	
 	player.x_pos += x_delta
 	player.y_pos += y_delta
@@ -95,10 +105,9 @@ while not gameExit:
 		player.y_pos = 780
 	elif player.y_pos > 800:
 		player.y_pos = 0
-
 	
 	# gameDisplay.fill(blue, rect=[x_pos,y_pos, 20, 20])
-	if len(enemy_list) < 5 and randint(0, 50) == 5:
+	if len(enemy_list) < 3 and randint(0, 50) == 5:
 		enemy_list.append(Enemy())
 		sprites = RenderPlain(enemy_list)
 		for enemy in sprites:
@@ -115,12 +124,10 @@ while not gameExit:
 
 	sprites.update()
 	sprites.draw(gameDisplay)
-	pygame.draw.rect(gameDisplay, (255, 200, 0), player.rect)
+	pygame.draw.rect(gameDisplay, blue, (player.x_pos, player.y_pos, 20, 20)) # is this not using the player class?
 	pygame.display.update()
 	clock.tick(60)
 
-
-
 #required
 pygame.quit()
-quit()				#exits python
+quit() #exits python
