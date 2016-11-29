@@ -2,6 +2,7 @@ import pygame
 from pygame import *
 from pygame.sprite import *
 from random import *
+import math
 from pygame.locals import Rect, DOUBLEBUF, QUIT, K_ESCAPE, KEYDOWN, K_DOWN, \
 K_LEFT, K_UP, K_RIGHT, KEYUP, K_LCTRL, K_RETURN, FULLSCREEN, K_SPACE
 
@@ -33,6 +34,14 @@ pygame.display.set_caption("Survival Game")
 # make the player unable to go past the wall objects (so actually like wall objects)
 # or make them like mines where they are stationary and the player should avoid hitting them too
 
+# maybe make it so you can kill off the walls? but the walls start spawning more and more so it's harder to kill them all off and avoid them
+# or maybe have yellow squares spawn and you have to eat the yellow squares
+# if player.rect.center == point.rect.center
+
+
+# how do i move the green prize to another object FAST ENOUGH while making sure it doesn't overlap with a black square?
+# im just making it random rn, but it's also hard to make the centers of each object line up exactly
+# maybe i should just check if it any part of it touches any part of the other object? (fix definition of a collision in general)
 
 class Player(Sprite):
 	def __init__(self):
@@ -42,6 +51,7 @@ class Player(Sprite):
 		self.width = 20
 		self.rect = pygame.Rect(self.x_pos, self.y_pos, self.length, self.width)
 		self.lives = 3
+		self.points = 0
 
 	def move(self, x, y):
 		self.rect.x += x
@@ -56,9 +66,9 @@ class Player(Sprite):
 class Enemy(Sprite):
 	def __init__(self):
 		Sprite.__init__(self)
-		self.image = image.load("enemy.bmp").convert_alpha()
+		self.image = image.load("poop.bmp").convert_alpha()
+		# self.image = image.load("bat.gif").convert_alpha()
 		self.rect = self.image.get_rect()
-		self.hits = 0
 
 		self.explosion_sound = pygame.mixer.Sound("Arcade Explo A.wav")
 		self.explosion_sound.set_volume(0.4)
@@ -74,13 +84,30 @@ class Enemy(Sprite):
 class Wall(Sprite):
 	def __init__(self):
 		Sprite.__init__(self)
-		self.x_pos = 400
-		self.y_pos = 400
+		self.x_pos = 0
+		self.y_pos = 0
 		self.length = 20
 		self.width = 20
 		self.rect = pygame.Rect(self.x_pos, self.y_pos, self.length, self.width)
 
-		
+
+class Prize(Sprite):
+	def __init__(self):
+		Sprite.__init__(self)
+		# self.x_pos = (randint(0, display_width - 50) // 20) * 20
+		# self.y_pos = (randint(0, display_width - 50) // 20) * 20
+		self.x_pos = 200
+		self.y_pos = 200
+		self.length = 20
+		self.width = 20
+		self.rect = pygame.Rect(self.x_pos, self.y_pos, self.length, self.width)
+
+	def move(self):
+		randX = (randint(0, display_width - 50) // 20) * 20
+		randY = (randint(0, display_width - 50) // 20) * 20
+		self.rect.center = (randX ,randY)
+
+
 player = Player()
 
 enemy = Enemy()
@@ -91,12 +118,15 @@ wall = Wall()
 wall_list = []
 wall_list.append(wall)
 
+prize = Prize()
+
 sprites = RenderPlain(enemy_list)
 everything = pygame.sprite.Group()
 
 f = font.Font(None, 30)
 
 hits = 0
+firstload = True
 gameExit = False
 while not gameExit:
 	gameDisplay.fill(white)
@@ -105,8 +135,15 @@ while not gameExit:
 		if event.type == pygame.QUIT:
 			gameExit = True
 
-		for enemy in enemy_list: # sometimes this doesn't work because it's still looping through the enemies
-			if player.check_collision(player, enemy):
+		# for enemy in enemy_list: # sometimes this doesn't work because it's still looping through the enemies
+		# 	if player.check_collision(player, enemy):
+		# 		print("collision!")
+		# 		mixer.Sound("cha-ching.wav").play()
+		# 		enemy.move()
+		# 		player.lives -= 1
+
+		for wall in wall_list: # sometimes this doesn't work because it's still looping through the enemies
+			if player.check_collision(player, wall):
 				print("collision!")
 				mixer.Sound("cha-ching.wav").play()
 				enemy.move()
@@ -138,38 +175,56 @@ while not gameExit:
 	elif player.rect.y > 800:
 		player.rect.y = 0
 
-	if len(enemy_list) < 5 and randint(0, 50) == 5:
-		enemy_list.append(Enemy())
-		sprites = RenderPlain(enemy_list)
-		for enemy in sprites:
-			enemy.move()
-	if randint(0, 30) == 5:
-		for enemy in sprites:
-			enemy.move()
+	# if len(enemy_list) < 5 and randint(0, 50) == 5:
+	# 	enemy_list.append(Enemy())
+	# 	sprites = RenderPlain(enemy_list)
+	# 	for enemy in sprites:
+	# 		enemy.move()
+	# if randint(0, 30) == 5:
+	# 	for enemy in sprites:
+	# 		enemy.move()
 
-	if player.lives == 0:
+	if player.rect.center == prize.rect.center:
+		print("player hit the prize!")
+		player.points += 1
+		prize.move()
+
+	if len(wall_list) < 50 and randint(0, 15) == 5:
+		temp_wall = Wall()
+		temp_wall.rect.x = (randint(0, display_width - 50) // 20) * 20 # HAVE TO ROUND THIS TO 40 OR 60 OR MULITPLES OF 20
+		temp_wall.rect.y = (randint(0, display_height - 50) // 20) * 20
+		while temp_wall.rect.x > 300 and temp_wall.rect.x < 500:
+			temp_wall.rect.x = (randint(0, display_width - 50) // 20) * 20
+		while temp_wall.rect.y < 50:
+			temp_wall.rect.y = (randint(0, display_height - 50) // 20) * 20
+		wall_list.append(temp_wall)
+
+
+	if player.lives <= 0:
 		# show game over message
-		myfont = pygame.font.SysFont("monospace", 15)
-		label = myfont.render("GAME OVER!!!", 1, red)
-		gameDisplay.blit(label, (400, 400))
+		# myfont = pygame.font.SysFont("monospace", 15)
+		# label = myfont.render("GAME OVER!!!", 1, red)
+		# gameDisplay.blit(label, (400, 400))
+		print("game over!!!")
+		print(player.points)
 		gameExit = True
 		# sys.exit()
 
 	# show number of seconds elapsed
 	time_text = f.render("Time Elapsed: " + str(pygame.time.get_ticks() / 1000), False, (0,0,0))
 	gameDisplay.blit(time_text, (300, 0))
-	lives_text = f.render("Current Lives: " + str(player.lives), False, (0,0,0))
-	gameDisplay.blit(lives_text, (300, 30))
+	if player.lives > 0:
+		lives_text = f.render("Current Lives: " + str(player.lives), False, (0,0,0))
+		gameDisplay.blit(lives_text, (300, 30))
 
-	sprites.update()
-	sprites.draw(gameDisplay)
+	# sprites.update()
+	# sprites.draw(gameDisplay)
 	pygame.draw.rect(gameDisplay, blue, player.rect)
-
-	pygame.draw.rect(gameDisplay, red, wall.rect)
-
-
+	pygame.draw.rect(gameDisplay, green, prize.rect)
+	for wall in wall_list:
+		pygame.draw.rect(gameDisplay, black, wall.rect)
 	pygame.display.update()
-	clock.tick(60)
+	clock.tick(30)
 
 
 #required

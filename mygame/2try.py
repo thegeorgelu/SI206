@@ -21,8 +21,8 @@ x_delta = 0
 y_delta = 0
 clock = pygame.time.Clock()
 
-display_width = 800
-display_height = 800
+display_width = 810
+display_height = 810
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption("Survival Game")
 
@@ -56,9 +56,9 @@ class Player(Sprite):
 class Enemy(Sprite):
 	def __init__(self):
 		Sprite.__init__(self)
-		self.image = image.load("bat.png").convert_alpha()
+		self.image = image.load("poop.bmp").convert_alpha()
+		# self.image = image.load("bat.gif").convert_alpha() # this doesn't work perfectly
 		self.rect = self.image.get_rect()
-		self.hits = 0
 
 	# move gold to a new random location
 	def move(self):
@@ -85,7 +85,7 @@ while not gameExit:
 		if event.type == pygame.QUIT:
 			gameExit = True
 
-		for enemy in enemy_list: # sometimes this doesn't work because it's still looping through the enemies
+		for enemy in enemy_list: # sometimes this doesn't work because it's still looping through the enemies, maybe just have multiple enemy sprites
 			if player.check_collision(player, enemy):
 				print("collision!")
 				mixer.Sound("cha-ching.wav").play()
@@ -126,9 +126,10 @@ while not gameExit:
 
 	if player.lives == 0:
 		# show game over message
-		myfont = pygame.font.SysFont("monospace", 15)
-		label = myfont.render("GAME OVER!!!", 1, red)
-		gameDisplay.blit(label, (400, 400))
+		# myfont = pygame.font.SysFont("monospace", 15)
+		# label = myfont.render("GAME OVER!!!", 1, red)
+		# gameDisplay.blit(label, (400, 400))
+		print("game over!")
 		gameExit = True
 		# sys.exit()
 
