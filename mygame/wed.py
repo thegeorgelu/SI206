@@ -3,7 +3,7 @@ from pygame import *
 from pygame.sprite import *
 from random import *
 from pygame.locals import Rect, DOUBLEBUF, QUIT, K_ESCAPE, KEYDOWN, K_DOWN, \
-K_LEFT, K_UP, K_RIGHT, KEYUP, K_LCTRL, K_RETURN, FULLSCREEN
+K_LEFT, K_UP, K_RIGHT, KEYUP, K_LCTRL, K_RETURN, FULLSCREEN, K_SPACE
 
 pygame.init();
 
@@ -56,21 +56,41 @@ class Player(Sprite):
 class Enemy(Sprite):
 	def __init__(self):
 		Sprite.__init__(self)
-		self.image = image.load("bat.png").convert_alpha()
+		self.image = image.load("enemy.bmp").convert_alpha()
 		self.rect = self.image.get_rect()
 		self.hits = 0
 
-	# move gold to a new random location
+		self.explosion_sound = pygame.mixer.Sound("Arcade Explo A.wav")
+		self.explosion_sound.set_volume(0.4)
+
+	# move enemy sprite to a new random location
 	def move(self):
 		randX = randint(0, display_width - 50)
 		randY = randint(0, display_height - 50)
 		self.rect.center = (randX ,randY)
 
+	# def kill(self):
+
+class Wall(Sprite):
+	def __init__(self):
+		Sprite.__init__(self)
+		self.x_pos = 400
+		self.y_pos = 400
+		self.length = 20
+		self.width = 20
+		self.rect = pygame.Rect(self.x_pos, self.y_pos, self.length, self.width)
+
 		
 player = Player()
+
 enemy = Enemy()
 enemy_list = []
 enemy_list.append(enemy)
+
+wall = Wall()
+wall_list = []
+wall_list.append(wall)
+
 sprites = RenderPlain(enemy_list)
 everything = pygame.sprite.Group()
 
@@ -103,6 +123,9 @@ while not gameExit:
 				y_delta -= 10
 			if event.key == pygame.K_DOWN:
 				y_delta += 10
+			# if event.key == pygame.K_SPACE:
+			# 	for enemy in enemy_list:
+			# 		enemy.
 	
 	player.rect.x += x_delta
 	player.rect.y += y_delta
@@ -141,6 +164,10 @@ while not gameExit:
 	sprites.update()
 	sprites.draw(gameDisplay)
 	pygame.draw.rect(gameDisplay, blue, player.rect)
+
+	pygame.draw.rect(gameDisplay, red, wall.rect)
+
+
 	pygame.display.update()
 	clock.tick(60)
 
