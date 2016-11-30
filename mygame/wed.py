@@ -2,6 +2,7 @@ import pygame
 from pygame import *
 from pygame.sprite import *
 from random import *
+from pygame.mixer import *
 import math
 from pygame.locals import Rect, DOUBLEBUF, QUIT, K_ESCAPE, KEYDOWN, K_DOWN, \
 K_LEFT, K_UP, K_RIGHT, KEYUP, K_LCTRL, K_RETURN, FULLSCREEN, K_SPACE
@@ -14,11 +15,10 @@ black = (0,0,0)
 red = (255, 0, 0)
 green = (0, 255, 0)
 blue = (0, 0, 255)
-violet = (238, 130, 238)
-medium_violet = (199, 21, 133)
-violet_red = (208, 32, 144)
 
-#position update vars
+#position vars
+x_pos = 0
+y_pos = 0
 x_delta = 0
 y_delta = 0
 clock = pygame.time.Clock()
@@ -30,12 +30,12 @@ pygame.display.set_caption("Survival Game")
 
 # should i create a screen explosion the player can use once just like in the testing_pygame game?
 
-# maybe randomly add bad_block objects too to make the player have to avoid them too
+# maybe randomly add wall objects too to make the player have to avoid them too
 # 2 options
-# make the player unable to go past the bad_block objects (so actually like bad_block objects)
+# make the player unable to go past the wall objects (so actually like wall objects)
 # or make them like mines where they are stationary and the player should avoid hitting them too
 
-# maybe make it so you can kill off the bad_blocks? but the bad_blocks start spawning more and more so it's harder to kill them all off and avoid them
+# maybe make it so you can kill off the walls? but the walls start spawning more and more so it's harder to kill them all off and avoid them
 # or maybe have yellow squares spawn and you have to eat the yellow squares
 # if player.rect.center == point.rect.center
 
@@ -51,7 +51,6 @@ class Player(Sprite):
 		self.length = 20
 		self.width = 20
 		self.rect = pygame.Rect(self.x_pos, self.y_pos, self.length, self.width)
-
 		self.lives = 3
 		self.points = 0
 
@@ -65,98 +64,96 @@ class Player(Sprite):
 			return True
 		return False
 
-class BadBlock(Sprite):
+class Enemy(Sprite):
 	def __init__(self):
 		Sprite.__init__(self)
-		self.x_pos = 600
-		self.y_pos = 400
+		self.image = image.load("poop.bmp").convert_alpha()
+		# self.image = image.load("bat.gif").convert_alpha()
+		self.rect = self.image.get_rect()
+
+		self.explosion_sound = pygame.mixer.Sound("Arcade Explo A.wav")
+		self.explosion_sound.set_volume(0.4)
+
+	# move enemy sprite to a new random location
+	def move(self):
+		randX = randint(0, display_width - 50)
+		randY = randint(0, display_height - 50)
+		self.rect.center = (randX ,randY)
+
+	# def kill(self):
+
+class Wall(Sprite):
+	def __init__(self):
+		Sprite.__init__(self)
+		self.x_pos = 0
+		self.y_pos = 0
 		self.length = 20
 		self.width = 20
 		self.rect = pygame.Rect(self.x_pos, self.y_pos, self.length, self.width)
-
-	def move(self):
-		randX = (randint(20, display_width - 20) // 20) * 20
-		randY = (randint(20, display_width - 20) // 20) * 20
-		self.rect.center = (randX ,randY)
 
 
 class Prize(Sprite):
 	def __init__(self):
 		Sprite.__init__(self)
+		# self.x_pos = (randint(0, display_width - 50) // 20) * 20
+		# self.y_pos = (randint(0, display_width - 50) // 20) * 20
 		self.x_pos = 200
-		self.y_pos = 400
+		self.y_pos = 200
 		self.length = 20
 		self.width = 20
 		self.rect = pygame.Rect(self.x_pos, self.y_pos, self.length, self.width)
 
 	def move(self):
-		randX = (randint(20, display_width - 20) // 20) * 20
-		randY = (randint(20, display_width - 20) // 20) * 20
-		self.rect.center = (randX ,randY)
-
-class Enemy(Sprite):
-	def __init__(self):
-		Sprite.__init__(self)
-		self.image = image.load("poop.bmp").convert_alpha()
-		self.rect = self.image.get_rect()
-		self.rect.center = (400, 200)
-
-	# move enemy sprite to a new random location
-	def move(self):
-		randX = randint(50, display_width - 50)
-		randY = randint(50, display_height - 50)
+		randX = (randint(0, display_width - 20) // 20) * 20
+		randY = (randint(0, display_width - 20) // 20) * 20
 		self.rect.center = (randX ,randY)
 
 
 player = Player()
 
-bad_block = BadBlock()
-bad_block_list = []
-bad_block_list.append(bad_block)
+enemy = Enemy()
+enemy_list = []
+enemy_list.append(enemy)
 
-bad_block_dict = {}
-bad_block_dict[bad_block.rect.center] = bad_block
+wall = Wall()
+wall_list = []
+wall_list.append(wall)
 
 prize = Prize()
 
-enemy = Enemy()
-enemies = RenderPlain(enemy)
+sprites = RenderPlain(enemy_list)
+everything = pygame.sprite.Group()
 
 f = font.Font(None, 30)
 
+if pygame.mixer.get_init():
+	pygame.mixer.music.load("cha-ching.wav")
+	pygame.mixer.music.set_volume(0.8)
+	pygame.mixer.music.play(-1)
+
+hits = 0
+firstload = True
 gameExit = False
-time_check = 3000
-enemy_time_check = 5000
 while not gameExit:
 	gameDisplay.fill(white)
 
 	for event in pygame.event.get():
-		if event.type == pygame.QUIT or event.type == pygame.K_ESCAPE:
+		if event.type == pygame.QUIT:
 			gameExit = True
 
-		# could use a dictionary where keys are the x, y coordinates and value is the bad_block object
-		# just check if player is on those coordinates, check if the player object is colliding with the key's bad_block object
+		# for enemy in enemy_list: # sometimes this doesn't work because it's still looping through the enemies
+		# 	if player.check_collision(player, enemy):
+		# 		print("collision!")
+		# 		mixer.Sound("cha-ching.wav").play()
+		# 		enemy.move()
+		# 		player.lives -= 1
 
-
-
-		for bad_block in bad_block_list: # sometimes this doesn't work because it's still looping through the enemies
-			if player.check_collision(player, bad_block):
+		for wall in wall_list: # sometimes this doesn't work because it's still looping through the enemies
+			if player.check_collision(player, wall):
 				print("collision!")
-				# mixer.Sound("cha-ching.wav").play()
-				bad_block.move()
+				mixer.Sound("cha-ching.wav").play()
+				enemy.move()
 				player.lives -= 1
-
-		if player.check_collision(player, prize):
-			print("player hit the prize!")
-			mixer.Sound("cha-ching.wav").play()
-			player.points += 1
-			prize.move()
-
-		if player.check_collision(player, enemy):
-			print("player hit the bat!")
-			# mixer.Sound("cha-ching.wav").play()
-			player.lives -= 1
-			enemy.move()
 
 		if event.type == pygame.KEYDOWN:
 			x_delta = 0
@@ -169,83 +166,72 @@ while not gameExit:
 				y_delta -= 10
 			if event.key == pygame.K_DOWN:
 				y_delta += 10
+			# if event.key == pygame.K_SPACE:
+			# 	for enemy in enemy_list:
+			# 		enemy.
 	
 	player.rect.x += x_delta
 	player.rect.y += y_delta
 	if player.rect.x < 0:
-		player.rect.x = display_width - 20
-	elif player.rect.x > display_width:
+		player.rect.x = 780
+	elif player.rect.x > 800:
 		player.rect.x = 0
 	if player.rect.y < 0:
-		player.rect.y = display_height - 20
-	elif player.rect.y > display_height:
+		player.rect.y = 780
+	elif player.rect.y > 800:
 		player.rect.y = 0
 
-	if len(bad_block_list) < 1000 and pygame.time.get_ticks() > time_check: # this way adds a new block every few seconds
-		temp_bad_block = BadBlock()
-		temp_bad_block.rect.x = (randint(20, display_width - 20) // 20) * 20 # this should be rounding to multiples of 20 correctly
-		temp_bad_block.rect.y = (randint(20, display_height - 20) // 20) * 20
-		while temp_bad_block.rect.x >= 200 and temp_bad_block.rect.x <= 550 and temp_bad_block.rect.y <= 20:
-			temp_bad_block.rect.x = (randint(20, display_width - 20) // 20) * 20
-			temp_bad_block.rect.y = (randint(20, display_height - 20) // 20) * 20
-		bad_block_list.append(temp_bad_block)
-		if pygame.time.get_ticks() < 10000:
-			time_check += 800
-		elif pygame.time.get_ticks() < 16000:
-			time_check += 600
-		elif pygame.time.get_ticks() < 22000:
-			time_check += 400
-		else:
-			time_check += 200
+	# if len(enemy_list) < 5 and randint(0, 50) == 5:
+	# 	enemy_list.append(Enemy())
+	# 	sprites = RenderPlain(enemy_list)
+	# 	for enemy in sprites:
+	# 		enemy.move()
+	# if randint(0, 30) == 5:
+	# 	for enemy in sprites:
+	# 		enemy.move()
 
+	if player.rect.center == prize.rect.center: # this doesn't do it perfectly, is there a way to make it if any of the coordinates touch?
+		print("player hit the prize!")
+		player.points += 1
+		prize.move()
 
-	if pygame.time.get_ticks() > enemy_time_check:
-		enemy.move()
-		if pygame.time.get_ticks() < 10000:
-			enemy_time_check += 4000
-		elif pygame.time.get_ticks() < 26000:
-			enemy_time_check += 2000
-		elif pygame.time.get_ticks() < 40000:
-			enemy_time_check += 1000
-		else:
-			enemy_time_check += 800
+	if len(wall_list) < 50 and randint(0, 15) == 5:
+		temp_wall = Wall()
+		temp_wall.rect.x = (randint(0, display_width - 20) // 20) * 20 # this should be rounding to multiples of 20 correctly
+		temp_wall.rect.y = (randint(0, display_height - 20) // 20) * 20
+		while temp_wall.rect.x > 300 and temp_wall.rect.x < 500:
+			temp_wall.rect.x = (randint(0, display_width - 20) // 20) * 20
+		while temp_wall.rect.y < 50:
+			temp_wall.rect.y = (randint(0, display_height - 20) // 20) * 20
+		wall_list.append(temp_wall)
+
 
 	if player.lives <= 0:
+		# show game over message
+		# myfont = pygame.font.SysFont("monospace", 15)
+		# label = myfont.render("GAME OVER!!!", 1, red)
+		# gameDisplay.blit(label, (400, 400))
 		print("game over!!!")
 		print(player.points)
 		gameExit = True
+		# sys.exit()
 
 	# show number of seconds elapsed
-	time_text = f.render("Time Elapsed: " + str(pygame.time.get_ticks() / 1000), False, black)
-	gameDisplay.blit(time_text, (200, 0))
-	# if player.lives > 0:
-	# 	lives_text = f.render("Current Lives: " + str(player.lives), False, black)
-	# 	gameDisplay.blit(lives_text, (300, 30))
+	time_text = f.render("Time Elapsed: " + str(pygame.time.get_ticks() / 1000), False, (0,0,0))
+	gameDisplay.blit(time_text, (300, 0))
 	if player.lives > 0:
-		points_text = f.render("Points: " + str(player.points), False, black)
-		gameDisplay.blit(points_text, (450, 0))
+		lives_text = f.render("Current Lives: " + str(player.lives), False, (0,0,0))
+		gameDisplay.blit(lives_text, (300, 30))
 
-	enemies.update()
-	enemies.draw(gameDisplay)
+	# sprites.update()
+	# sprites.draw(gameDisplay)
 	pygame.draw.rect(gameDisplay, blue, player.rect)
 	pygame.draw.rect(gameDisplay, green, prize.rect)
-
-	# color of bad_blocks get more and more red as time goes on
-	if pygame.time.get_ticks() < 15000:
-		for bad_block in bad_block_list:
-			pygame.draw.rect(gameDisplay, violet, bad_block.rect)
-	elif pygame.time.get_ticks() < 30000:
-		for bad_block in bad_block_list:
-			pygame.draw.rect(gameDisplay, medium_violet, bad_block.rect)
-	elif pygame.time.get_ticks() < 45000:
-		for bad_block in bad_block_list:
-			pygame.draw.rect(gameDisplay, violet_red, bad_block.rect)
-	else:
-		for bad_block in bad_block_list:
-			pygame.draw.rect(gameDisplay, red, bad_block.rect)
-
+	for wall in wall_list:
+		pygame.draw.rect(gameDisplay, black, wall.rect)
 	pygame.display.update()
 	clock.tick(30)
+
 
 #required
 pygame.quit()
