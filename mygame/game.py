@@ -81,7 +81,7 @@ class Prize(Sprite):
 class Enemy(Sprite):
 	def __init__(self):
 		Sprite.__init__(self)
-		# self.image = image.load("bat.bmp").convert_alpha()
+		# self.image = image.load("enemy.bmp").convert_alpha()
 		self.image = image.load("poop.bmp").convert_alpha()
 		self.rect = self.image.get_rect()
 		self.rect.center = (400, 200)
@@ -149,6 +149,7 @@ while not gameExit:
 	elif player.rect.y > display_height:
 		player.rect.y = 0
 
+	# check if player collides with a bad block
 	for bad_block in bad_block_list:
 		if player.check_collision(player, bad_block):
 			print("collision!")
@@ -156,17 +157,19 @@ while not gameExit:
 			bad_block.move()
 			player.lives -= 1
 
+	# check if player collides with the prize
 	if player.check_collision(player, prize):
 		print("player hit the prize!")
 		mixer.Sound("coin.wav").play()
 		player.points += 1
 		prize.move()
 
+	# adds a new block faster and faster
 	if len(bad_block_list) < 1000 and pygame.time.get_ticks() > time_check: # this way adds a new block every few seconds
 		temp_bad_block = BadBlock()
 		temp_bad_block.rect.x = (randint(20, display_width - 20) // 20) * 20 # this should be rounding to multiples of 20 correctly
 		temp_bad_block.rect.y = (randint(20, display_height - 20) // 20) * 20
-		while temp_bad_block.rect.x >= 200 and temp_bad_block.rect.x <= 550 and temp_bad_block.rect.y <= 20:
+		while temp_bad_block.rect.x >= 120 and temp_bad_block.rect.x <= 650 and temp_bad_block.rect.y <= 20:
 			temp_bad_block.rect.x = (randint(20, display_width - 20) // 20) * 20
 			temp_bad_block.rect.y = (randint(20, display_height - 20) // 20) * 20
 		bad_block_list.append(temp_bad_block)
@@ -179,7 +182,7 @@ while not gameExit:
 		else:
 			time_check += 200
 
-
+	# moves the enemy faster and faster
 	if pygame.time.get_ticks() > enemy_time_check:
 		enemy.move()
 		if pygame.time.get_ticks() < 10000:
@@ -191,6 +194,7 @@ while not gameExit:
 		else:
 			enemy_time_check += 2000
 
+	# run game over stuff
 	if player.lives <= 0:
 		print("game over!!!")
 		print(player.points)
@@ -199,11 +203,11 @@ while not gameExit:
 	# show number of seconds elapsed, number of lives, and number of points
 	if player.lives > 0:
 		time_text = f.render("Time Elapsed: " + str(pygame.time.get_ticks() / 1000), False, black)
-		gameDisplay.blit(time_text, (100, 0))
+		gameDisplay.blit(time_text, (120, 0))
 		lives_text = f.render("Current Lives: " + str(player.lives), False, black)
 		gameDisplay.blit(lives_text, (350, 0))
 		points_text = f.render("Points: " + str(player.points), False, black)
-		gameDisplay.blit(points_text, (600, 0))
+		gameDisplay.blit(points_text, (550, 0))
 
 	enemies.update()
 	enemies.draw(gameDisplay)
