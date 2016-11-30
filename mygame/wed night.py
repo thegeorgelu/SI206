@@ -14,9 +14,10 @@ black = (0,0,0)
 red = (255, 0, 0)
 green = (0, 255, 0)
 blue = (0, 0, 255)
-violet = (238, 130, 238)
 
-#position update vars
+#position vars
+x_pos = 0
+y_pos = 0
 x_delta = 0
 y_delta = 0
 clock = pygame.time.Clock()
@@ -62,37 +63,56 @@ class Player(Sprite):
 			return True
 		return False
 
+class Enemy(Sprite):
+	def __init__(self):
+		Sprite.__init__(self)
+		self.image = image.load("poop.bmp").convert_alpha()
+		# self.image = image.load("bat.gif").convert_alpha()
+		self.rect = self.image.get_rect()
+
+		self.explosion_sound = pygame.mixer.Sound("Arcade Explo A.wav")
+		self.explosion_sound.set_volume(0.4)
+
+	# move enemy sprite to a new random location
+	def move(self):
+		randX = randint(0, display_width - 50)
+		randY = randint(0, display_height - 50)
+		self.rect.center = (randX ,randY)
+
+	# def kill(self):
+
 class Wall(Sprite):
 	def __init__(self):
 		Sprite.__init__(self)
-		self.x_pos = 600
-		self.y_pos = 400
+		self.x_pos = 0
+		self.y_pos = 0
 		self.length = 20
 		self.width = 20
 		self.rect = pygame.Rect(self.x_pos, self.y_pos, self.length, self.width)
-
-	def move(self):
-		randX = (randint(20, display_width - 20) // 20) * 20
-		randY = (randint(20, display_width - 20) // 20) * 20
-		self.rect.center = (randX ,randY)
 
 
 class Prize(Sprite):
 	def __init__(self):
 		Sprite.__init__(self)
+		# self.x_pos = (randint(0, display_width - 50) // 20) * 20
+		# self.y_pos = (randint(0, display_width - 50) // 20) * 20
 		self.x_pos = 200
-		self.y_pos = 400
+		self.y_pos = 200
 		self.length = 20
 		self.width = 20
 		self.rect = pygame.Rect(self.x_pos, self.y_pos, self.length, self.width)
 
 	def move(self):
-		randX = (randint(20, display_width - 20) // 20) * 20
-		randY = (randint(20, display_width - 20) // 20) * 20
+		randX = (randint(0, display_width - 20) // 20) * 20
+		randY = (randint(0, display_width - 20) // 20) * 20
 		self.rect.center = (randX ,randY)
 
 
 player = Player()
+
+enemy = Enemy()
+enemy_list = []
+enemy_list.append(enemy)
 
 wall = Wall()
 wall_list = []
@@ -100,10 +120,14 @@ wall_list.append(wall)
 
 prize = Prize()
 
+sprites = RenderPlain(enemy_list)
+everything = pygame.sprite.Group()
+
 f = font.Font(None, 30)
 
+hits = 0
+firstload = True
 gameExit = False
-time_check = 3000
 while not gameExit:
 	gameDisplay.fill(white)
 
@@ -111,11 +135,18 @@ while not gameExit:
 		if event.type == pygame.QUIT:
 			gameExit = True
 
+		# for enemy in enemy_list: # sometimes this doesn't work because it's still looping through the enemies
+		# 	if player.check_collision(player, enemy):
+		# 		print("collision!")
+		# 		mixer.Sound("cha-ching.wav").play()
+		# 		enemy.move()
+		# 		player.lives -= 1
+
 		for wall in wall_list: # sometimes this doesn't work because it's still looping through the enemies
 			if player.check_collision(player, wall):
 				print("collision!")
 				mixer.Sound("cha-ching.wav").play()
-				wall.move()
+				enemy.move()
 				player.lives -= 1
 
 		if event.type == pygame.KEYDOWN:
@@ -129,6 +160,9 @@ while not gameExit:
 				y_delta -= 10
 			if event.key == pygame.K_DOWN:
 				y_delta += 10
+			# if event.key == pygame.K_SPACE:
+			# 	for enemy in enemy_list:
+			# 		enemy.
 	
 	player.rect.x += x_delta
 	player.rect.y += y_delta
@@ -141,67 +175,57 @@ while not gameExit:
 	elif player.rect.y > 800:
 		player.rect.y = 0
 
+	# if len(enemy_list) < 5 and randint(0, 50) == 5:
+	# 	enemy_list.append(Enemy())
+	# 	sprites = RenderPlain(enemy_list)
+	# 	for enemy in sprites:
+	# 		enemy.move()
+	# if randint(0, 30) == 5:
+	# 	for enemy in sprites:
+	# 		enemy.move()
 
-	# this actually makes it so that if you are parallel with the prize on either the x or y axis you get the point
-	# could be a cool feature of the game, and just have to make the game harder in other ways
-	if player.rect.x == prize.rect.x - 5 or player.rect.x == prize.rect.x or player.rect.x == prize.rect.x + 5 and player.rect.y == prize.rect.y - 5 or player.rect.y == prize.rect.y or player.rect.y == prize.rect.y + 5:
+	if player.rect.center == prize.rect.center: # this doesn't do it perfectly, is there a way to make it if any of the coordinates touch?
 		print("player hit the prize!")
 		player.points += 1
 		prize.move()
 
-	# if player.rect.center == prize.rect.center: # this doesn't do it perfectly, is there a way to make it if any of the coordinates touch?
-	# 	print("player hit the prize!")
-	# 	player.points += 1
-	# 	prize.move()
-
-	if len(wall_list) < 1000 and pygame.time.get_ticks() > time_check: # this way adds a new block every few seconds
+	if len(wall_list) < 50 and randint(0, 15) == 5:
 		temp_wall = Wall()
-		temp_wall.rect.x = (randint(20, display_width - 20) // 20) * 20 # this should be rounding to multiples of 20 correctly
-		temp_wall.rect.y = (randint(20, display_height - 20) // 20) * 20
-		while temp_wall.rect.x >= 200 and temp_wall.rect.x <= 550 and temp_wall.rect.y <= 20:
-			temp_wall.rect.x = (randint(20, display_width - 20) // 20) * 20
-			temp_wall.rect.y = (randint(20, display_height - 20) // 20) * 20
+		temp_wall.rect.x = (randint(0, display_width - 20) // 20) * 20 # this should be rounding to multiples of 20 correctly
+		temp_wall.rect.y = (randint(0, display_height - 20) // 20) * 20
+		while temp_wall.rect.x > 300 and temp_wall.rect.x < 500:
+			temp_wall.rect.x = (randint(0, display_width - 20) // 20) * 20
+		while temp_wall.rect.y < 50:
+			temp_wall.rect.y = (randint(0, display_height - 20) // 20) * 20
 		wall_list.append(temp_wall)
-		if pygame.time.get_ticks() < 6000:
-			time_check += 8000
-		elif pygame.time.get_ticks() < 12000:
-			time_check += 600
-		elif pygame.time.get_ticks() < 20000:
-			time_check += 400
-		else:
-			time_check += 200
 
-	# if len(wall_list) < 200 and randint(0, 15) == 5:
-	# 	temp_wall = Wall()
-	# 	temp_wall.rect.x = (randint(20, display_width - 20) // 20) * 20 # this should be rounding to multiples of 20 correctly
-	# 	temp_wall.rect.y = (randint(20, display_height - 20) // 20) * 20
-	# 	while temp_wall.rect.x > 300 and temp_wall.rect.x < 500:
-	# 		temp_wall.rect.x = (randint(20, display_width - 20) // 20) * 20
-	# 	while temp_wall.rect.y < 50:
-	# 		temp_wall.rect.y = (randint(20, display_height - 20) // 20) * 20
-	# 	wall_list.append(temp_wall)
 
 	if player.lives <= 0:
+		# show game over message
+		# myfont = pygame.font.SysFont("monospace", 15)
+		# label = myfont.render("GAME OVER!!!", 1, red)
+		# gameDisplay.blit(label, (400, 400))
 		print("game over!!!")
 		print(player.points)
 		gameExit = True
+		# sys.exit()
 
 	# show number of seconds elapsed
-	time_text = f.render("Time Elapsed: " + str(pygame.time.get_ticks() / 1000), False, black)
-	gameDisplay.blit(time_text, (200, 0))
-	# if player.lives > 0:
-	# 	lives_text = f.render("Current Lives: " + str(player.lives), False, black)
-	# 	gameDisplay.blit(lives_text, (300, 30))
+	time_text = f.render("Time Elapsed: " + str(pygame.time.get_ticks() / 1000), False, (0,0,0))
+	gameDisplay.blit(time_text, (300, 0))
 	if player.lives > 0:
-		points_text = f.render("Points: " + str(player.points), False, black)
-		gameDisplay.blit(points_text, (450, 0))
+		lives_text = f.render("Current Lives: " + str(player.lives), False, (0,0,0))
+		gameDisplay.blit(lives_text, (300, 30))
 
+	# sprites.update()
+	# sprites.draw(gameDisplay)
 	pygame.draw.rect(gameDisplay, blue, player.rect)
 	pygame.draw.rect(gameDisplay, green, prize.rect)
 	for wall in wall_list:
-		pygame.draw.rect(gameDisplay, violet, wall.rect)
+		pygame.draw.rect(gameDisplay, black, wall.rect)
 	pygame.display.update()
 	clock.tick(30)
+
 
 #required
 pygame.quit()
