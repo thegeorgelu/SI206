@@ -7,6 +7,7 @@ from pygame.locals import Rect, DOUBLEBUF, QUIT, K_ESCAPE, KEYDOWN, K_DOWN, \
 K_LEFT, K_UP, K_RIGHT, KEYUP, K_LCTRL, K_RETURN, FULLSCREEN, K_SPACE
 
 pygame.init();
+easy_mode_flag = True
 
 # RGB colors
 white = (255,255,255)
@@ -17,14 +18,16 @@ blue = (0, 0, 255)
 violet = (238, 130, 238)
 medium_violet = (219, 112, 147)
 violet_red = (208, 32, 144)
+aqua = (127, 255, 212)
 
 #position update vars
 x_delta = 0
 y_delta = 0
 clock = pygame.time.Clock()
+credits_timer = 250
 
 display_width = 800
-display_height = 800
+display_height = 720
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption("Survival Game")
 
@@ -36,7 +39,7 @@ class Player(Sprite):
 		self.width = 20
 		self.rect = pygame.Rect(self.x_pos, self.y_pos, self.length, self.width)
 
-		self.lives = 10
+		self.lives = 15
 		self.points = 0
 
 	def move(self, x, y):
@@ -106,13 +109,22 @@ enemies = RenderPlain(enemy)
 
 f = font.Font(None, 30)
 
+# play music in the background
 pygame.mixer.music.load("soundtrack.wav")
 pygame.mixer.music.set_volume(0.6)
 pygame.mixer.music.play(-1)
 
-gameExit = False
+# enemy delay values
 time_check = 3000
 enemy_time_check = 5000
+
+update_life_1 = True
+update_life_2 = True
+update_life_3 = True
+update_life_4 = True
+update_life_5 = True
+
+gameExit = False
 while not gameExit:
 	gameDisplay.fill(white)
 
@@ -155,6 +167,7 @@ while not gameExit:
 			print("collision!")
 			mixer.Sound("badblockhit.wav").play()
 			bad_block.move()
+			prize.move() # TROLL
 			player.lives -= 1
 
 	# check if player collides with the prize
@@ -173,14 +186,30 @@ while not gameExit:
 			temp_bad_block.rect.x = (randint(20, display_width - 20) // 20) * 20
 			temp_bad_block.rect.y = (randint(20, display_height - 20) // 20) * 20
 		bad_block_list.append(temp_bad_block)
-		if pygame.time.get_ticks() < 10000:
-			time_check += 800
-		elif pygame.time.get_ticks() < 16000:
-			time_check += 600
-		elif pygame.time.get_ticks() < 22000:
-			time_check += 400
+
+		# easy mode:
+		if easy_mode_flag:
+			if pygame.time.get_ticks() < 10000:
+				time_check += 4000
+			elif pygame.time.get_ticks() < 30000:
+				time_check += 2000
+			elif pygame.time.get_ticks() < 60000:
+				time_check += 1000
+			else:
+				time_check += 600
+		# hard mode
 		else:
-			time_check += 200
+			if pygame.time.get_ticks() < 10000:
+				time_check += 800
+			elif pygame.time.get_ticks() < 16000:
+				time_check += 600
+			elif pygame.time.get_ticks() < 22000:
+				time_check += 400
+			else:
+				time_check += 200
+
+
+
 
 	# moves the enemy faster and faster
 	if pygame.time.get_ticks() > enemy_time_check:
@@ -194,11 +223,41 @@ while not gameExit:
 		else:
 			enemy_time_check += 2000
 
+	# give lives back to players as they collect more points
+	if player.points == 5:
+		if update_life_1:
+			player.lives += 1
+			update_life_1 = False
+	elif player.points == 10:
+		if update_life_2:
+			player.lives += 2
+			update_life_2 = False
+	elif player.points == 15:
+		if update_life_3:
+			player.lives += 3
+			update_life_3 = False
+	elif player.points == 20:
+		if update_life_4:
+			player.lives += 5
+			update_life_4 = False
+	elif player.points == 25:
+		if update_life_5:
+			player.lives += 10
+			update_life_5 = False
+
 	# run game over stuff
 	if player.lives <= 0:
 		print("game over!!!")
 		print(player.points)
-		gameExit = True
+
+		myfont = pygame.font.SysFont("monospace", 15)
+		credits = myfont.render("GAME OVER!", 100, black)
+		gameDisplay.blit(credits, (370, 360))
+
+		if credits_timer:
+			credits_timer -= 1
+		else:
+			gameExit = True
 
 	# show number of seconds elapsed, number of lives, and number of points
 	if player.lives > 0:
@@ -215,6 +274,7 @@ while not gameExit:
 	pygame.draw.rect(gameDisplay, green, prize.rect)
 
 	# color of bad_blocks gets more and more red as time goes on
+	# and then things start getting crazy
 	if pygame.time.get_ticks() < 15000:
 		for bad_block in bad_block_list:
 			pygame.draw.rect(gameDisplay, violet, bad_block.rect)
@@ -224,9 +284,26 @@ while not gameExit:
 	elif pygame.time.get_ticks() < 45000:
 		for bad_block in bad_block_list:
 			pygame.draw.rect(gameDisplay, violet_red, bad_block.rect)
-	else:
+	elif pygame.time.get_ticks() < 60000:
 		for bad_block in bad_block_list:
 			pygame.draw.rect(gameDisplay, red, bad_block.rect)
+	# things start to get crazy
+	# flashing lights mode haha
+	elif pygame.time.get_ticks() < 90000:
+		if pygame.time.get_ticks() % 4 == 0:
+			for bad_block in bad_block_list:
+				pygame.draw.rect(gameDisplay, violet, bad_block.rect)
+		else:
+			for bad_block in bad_block_list:
+				pygame.draw.rect(gameDisplay, aqua, bad_block.rect)
+	else:
+		if pygame.time.get_ticks() % 4 == 0:
+			for bad_block in bad_block_list:
+				pygame.draw.rect(gameDisplay, violet, bad_block.rect)
+		else:
+			for bad_block in bad_block_list:
+				pygame.draw.rect(gameDisplay, green, bad_block.rect)
+
 
 	pygame.display.update()
 	clock.tick(30)
