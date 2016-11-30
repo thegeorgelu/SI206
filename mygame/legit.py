@@ -81,7 +81,8 @@ class Prize(Sprite):
 class Enemy(Sprite):
 	def __init__(self):
 		Sprite.__init__(self)
-		self.image = image.load("bat.bmp").convert_alpha()
+		# self.image = image.load("bat.bmp").convert_alpha()
+		self.image = image.load("poop.bmp").convert_alpha()
 		self.rect = self.image.get_rect()
 		self.rect.center = (400, 200)
 
@@ -105,6 +106,10 @@ enemies = RenderPlain(enemy)
 
 f = font.Font(None, 30)
 
+pygame.mixer.music.load("soundtrack.wav")
+pygame.mixer.music.set_volume(0.6)
+pygame.mixer.music.play(-1)
+
 gameExit = False
 time_check = 3000
 enemy_time_check = 5000
@@ -112,7 +117,7 @@ while not gameExit:
 	gameDisplay.fill(white)
 
 	for event in pygame.event.get():
-		if event.type == pygame.QUIT or event.type == pygame.K_ESCAPE:
+		if event.type == pygame.QUIT:
 			gameExit = True
 
 		if event.type == pygame.KEYDOWN:
@@ -126,6 +131,12 @@ while not gameExit:
 				y_delta -= 10
 			if event.key == pygame.K_DOWN:
 				y_delta += 10
+
+		if player.check_collision(player, enemy): # lags when hitting this guy now, not sure if i should keep it in the for loop or take it out to underneath
+			print("player hit the bat!")
+			mixer.Sound("enemyhit.wav").play()
+			player.lives -= 3
+			enemy.move()
 	
 	player.rect.x += x_delta
 	player.rect.y += y_delta
@@ -141,20 +152,15 @@ while not gameExit:
 	for bad_block in bad_block_list:
 		if player.check_collision(player, bad_block):
 			print("collision!")
-			# mixer.Sound("cha-ching.wav").play()
+			mixer.Sound("badblock.wav").play()
 			bad_block.move()
 			player.lives -= 1
 
 	if player.check_collision(player, prize):
 		print("player hit the prize!")
-		mixer.Sound("cha-ching.wav").play()
+		mixer.Sound("coin.wav").play()
 		player.points += 1
 		prize.move()
-
-	if player.check_collision(player, enemy):
-		print("player hit the bat!")
-		# mixer.Sound("cha-ching.wav").play()
-		player.lives -= 3
 
 	if len(bad_block_list) < 1000 and pygame.time.get_ticks() > time_check: # this way adds a new block every few seconds
 		temp_bad_block = BadBlock()
@@ -176,13 +182,13 @@ while not gameExit:
 	if pygame.time.get_ticks() > enemy_time_check:
 		enemy.move()
 		if pygame.time.get_ticks() < 10000:
-			enemy_time_check += 4000
+			enemy_time_check += 8000
 		elif pygame.time.get_ticks() < 26000:
-			enemy_time_check += 2000
+			enemy_time_check += 6000
 		elif pygame.time.get_ticks() < 40000:
-			enemy_time_check += 1000
+			enemy_time_check += 4000
 		else:
-			enemy_time_check += 800
+			enemy_time_check += 2000
 
 	if player.lives <= 0:
 		print("game over!!!")
@@ -223,3 +229,4 @@ while not gameExit:
 #required
 pygame.quit()
 quit() #exits python
+
