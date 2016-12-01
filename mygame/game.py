@@ -3,8 +3,6 @@ from pygame import *
 from pygame.sprite import *
 from random import *
 import math
-from pygame.locals import Rect, DOUBLEBUF, QUIT, K_ESCAPE, KEYDOWN, K_DOWN, \
-K_LEFT, K_UP, K_RIGHT, KEYUP, K_LCTRL, K_RETURN, FULLSCREEN, K_SPACE
 
 pygame.init();
 easy_mode_flag = True
@@ -23,13 +21,16 @@ aqua = (127, 255, 212)
 #position update vars
 x_delta = 0
 y_delta = 0
+
+# pygame clock
 clock = pygame.time.Clock()
-credits_timer = 250
+
+credits_timer = 5000
 
 display_width = 800
 display_height = 720
 gameDisplay = pygame.display.set_mode((display_width, display_height))
-pygame.display.set_caption("Survival Game")
+pygame.display.set_caption("The Survival Game")
 
 class Player(Sprite):
 	def __init__(self):
@@ -77,9 +78,12 @@ class Prize(Sprite):
 		self.rect = pygame.Rect(self.x_pos, self.y_pos, self.length, self.width)
 
 	def move(self):
-		randX = (randint(20, display_width - 20) // 20) * 20
-		randY = (randint(20, display_width - 20) // 20) * 20
-		self.rect.center = (randX ,randY)
+		randX = (randint(20, display_width - 20) // 20) * 20 # this should be rounding to multiples of 20 correctly
+		randY = (randint(20, display_height - 20) // 20) * 20
+		while randX >= 120 and randX <= 650 and randY <= 20:
+			randX = (randint(20, display_width - 20) // 20) * 20
+			randY= (randint(20, display_height - 20) // 20) * 20
+		self.rect.center = (randX, randY)
 
 class Enemy(Sprite):
 	def __init__(self):
@@ -144,7 +148,8 @@ while not gameExit:
 			if event.key == pygame.K_DOWN:
 				y_delta += 10
 
-		if player.check_collision(player, enemy): # lags when hitting this guy now, not sure if i should keep it in the for loop or take it out to underneath
+		# working fine for now (with the poop.bmp)
+		if player.check_collision(player, enemy):
 			print("player hit the bat!")
 			mixer.Sound("enemyhit.wav").play()
 			player.lives -= 3
@@ -210,7 +215,6 @@ while not gameExit:
 
 
 
-
 	# moves the enemy faster and faster
 	if pygame.time.get_ticks() > enemy_time_check:
 		enemy.move()
@@ -249,9 +253,12 @@ while not gameExit:
 	if player.lives <= 0:
 		print("game over!!!")
 		print(player.points)
+		gameExit = True
 
-		myfont = pygame.font.SysFont("monospace", 15)
-		credits = myfont.render("GAME OVER!", 100, black)
+		# need to somehow get rid of the rest of the screen
+
+		myfont = pygame.font.SysFont("monospace", 50)
+		credits = myfont.render("GAME OVER!", 1, black)
 		gameDisplay.blit(credits, (370, 360))
 
 		if credits_timer:
@@ -307,6 +314,15 @@ while not gameExit:
 
 	pygame.display.update()
 	clock.tick(30)
+
+
+# once game is over
+gameDisplay.fill(white)
+myfont = pygame.font.SysFont("monospace", 50)
+credits = myfont.render("GAME OVER!", 1, black)
+gameDisplay.blit(credits, (370, 360))
+while credits_timer:
+	credits_timer -= 1
 
 #required
 pygame.quit()
