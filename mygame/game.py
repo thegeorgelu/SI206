@@ -337,7 +337,7 @@ def main():
 	print("game over!!!")
 	print(player.points)
 
-	while credits_timer > 0:
+	if credits_timer > 0:
 		gameDisplay.fill(white)
 		myfont = pygame.font.SysFont("monospace", 50)
 		credits = myfont.render("GAME OVER!", 1, black)
