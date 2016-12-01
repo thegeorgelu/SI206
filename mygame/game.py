@@ -21,6 +21,7 @@ violet_red = (208, 32, 144)
 aqua = (127, 255, 212)
 saddle_brown = (139, 69, 19)
 maroon = (176, 48, 96)
+forest_green = (34, 139, 34)
 
 #position update vars
 x_delta = 0
@@ -205,17 +206,17 @@ while not gameExit:
 			elif pygame.time.get_ticks() < 60000:
 				time_check += 1000
 			else:
-				time_check += 600
+				time_check += 100
 		# hard mode
 		else:
 			if pygame.time.get_ticks() < 10000:
 				time_check += 800
 			elif pygame.time.get_ticks() < 16000:
-				time_check += 600
+				time_check += 500
 			elif pygame.time.get_ticks() < 22000:
-				time_check += 400
+				time_check += 300
 			else:
-				time_check += 150
+				time_check += 50
 
 
 
@@ -282,7 +283,7 @@ while not gameExit:
 	enemies.update()
 	enemies.draw(gameDisplay)
 	pygame.draw.rect(gameDisplay, blue, player.rect)
-	pygame.draw.rect(gameDisplay, saddle_brown, prize.rect)
+	pygame.draw.rect(gameDisplay, forest_green, prize.rect)
 
 	# color of bad_blocks gets more and more red as time goes on
 	# and then things start getting crazy
