@@ -36,6 +36,7 @@ class Player(Sprite):
 
 		self.health = 15
 		self.points = 0
+		self.last_point_received = 0
 
 	def move(self, x, y):
 		self.rect.x += x
@@ -57,10 +58,12 @@ class BadBlock(Sprite):
 		self.rect = pygame.Rect(self.x_pos, self.y_pos, self.length, self.width)
 
 	def move(self):
-		randX = (randint(20, display_width - 20) // 20) * 20
-		randY = (randint(20, display_width - 20) // 20) * 20
-		self.rect.center = (randX ,randY)
-
+		randX = (randint(20, display_width - 20) // 20) * 20 # this should be rounding to multiples of 20 correctly
+		randY = (randint(20, display_height - 20) // 20) * 20
+		while randX >= 120 and randX <= 650 and randY <= 20:
+			randX = (randint(20, display_width - 20) // 20) * 20
+			randY= (randint(20, display_height - 20) // 20) * 20
+		self.rect.center = (randX, randY)
 
 class Prize(Sprite):
 	def __init__(self):
@@ -105,7 +108,7 @@ def main():
 	# pygame clock
 	clock = pygame.time.Clock()
 
-	credits_timer = 20000
+	credits_timer = 500
 
 	player = Player()
 
@@ -147,6 +150,8 @@ def main():
 
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
+				time_survived = pygame.time.get_ticks() / 1000
+				end_points = player.points
 				gameExit = True
 
 			if event.type == pygame.KEYDOWN:
@@ -160,6 +165,8 @@ def main():
 					y_delta -= 10
 				if event.key == pygame.K_DOWN:
 					y_delta += 10
+				if event.key == pygame.K_1:
+					prize.move()
 
 			# working fine for now (with the poop.bmp)
 			if player.check_collision(player, enemy):
@@ -194,6 +201,7 @@ def main():
 			mixer.Sound("1up.wav").play()
 			player.points += 1
 			prize.move()
+			player.last_point_received = pygame.time.get_ticks()
 
 		# adds a new block faster and faster
 		if len(bad_block_list) < 1000 and pygame.time.get_ticks() > time_check: # this way adds a new block every few seconds
@@ -216,7 +224,7 @@ def main():
 				elif pygame.time.get_ticks() < 90000:
 					time_check += 600
 				else:
-					time_check += 400
+					time_check += 300
 			# hard mode
 			else:
 				if pygame.time.get_ticks() < 10000:
@@ -229,8 +237,6 @@ def main():
 					time_check += 200
 				else:
 					time_check += 100
-
-
 
 		# moves the enemy faster and faster
 		if pygame.time.get_ticks() > enemy_time_check:
@@ -277,7 +283,7 @@ def main():
 			time_text = f.render("Time Elapsed: " + str(pygame.time.get_ticks() / 1000), False, black)
 			gameDisplay.blit(time_text, (120, 0))
 			health_text = f.render("Current Health: " + str(player.health), False, black)
-			gameDisplay.blit(health_text, (350, 0))
+			gameDisplay.blit(health_text, (345, 0))
 			points_text = f.render("Points: " + str(player.points), False, black)
 			gameDisplay.blit(points_text, (550, 0))
 
@@ -304,7 +310,6 @@ def main():
 			late_game_color_blocks_switch = True
 		# things start to get crazy
 		# flashing lights mode haha
-
 		if late_game_color_blocks_switch and flashing_mode_flag:
 			if pygame.time.get_ticks() < 90000:
 				if pygame.time.get_ticks() % 10 == 0:
@@ -332,12 +337,13 @@ def main():
 	print("game over!!!")
 	print(player.points)
 
-	if credits_timer:
+	while credits_timer > 0:
+		gameDisplay.fill(white)
 		myfont = pygame.font.SysFont("monospace", 50)
 		credits = myfont.render("GAME OVER!", 1, black)
 		gameDisplay.blit(credits, (300, 300))
 		time_survived = myfont.render("Time Survived: " + str(time_survived), 1, black)
-		gameDisplay.blit(time_survived, (250, 330))
+		gameDisplay.blit(time_survived, (240, 330))
 		end_points = myfont.render("Total Points: " + str(end_points), 1, black)
 		gameDisplay.blit(end_points, (280, 360))
 		pygame.display.update()
@@ -345,10 +351,8 @@ def main():
 		credits_timer -= 1
 	else:
 		pygame.quit()
-		quit() #exits python
-
-
-
+		quit() # does this exit correctly?
+		sys.exit()
 
 
 if __name__ == '__main__':
