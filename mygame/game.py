@@ -25,7 +25,7 @@ y_delta = 0
 # pygame clock
 clock = pygame.time.Clock()
 
-credits_timer = 5000
+credits_timer = 500000
 
 display_width = 800
 display_height = 720
@@ -40,7 +40,7 @@ class Player(Sprite):
 		self.width = 20
 		self.rect = pygame.Rect(self.x_pos, self.y_pos, self.length, self.width)
 
-		self.lives = 15
+		self.health = 15
 		self.points = 0
 
 	def move(self, x, y):
@@ -152,7 +152,7 @@ while not gameExit:
 		if player.check_collision(player, enemy):
 			print("player hit the bat!")
 			mixer.Sound("enemyhit.wav").play()
-			player.lives -= 3
+			player.health -= 3
 			enemy.move()
 	
 	player.rect.x += x_delta
@@ -173,7 +173,7 @@ while not gameExit:
 			mixer.Sound("badblockhit.wav").play()
 			bad_block.move()
 			prize.move() # TROLL
-			player.lives -= 1
+			player.health -= 1
 
 	# check if player collides with the prize
 	if player.check_collision(player, prize):
@@ -211,7 +211,7 @@ while not gameExit:
 			elif pygame.time.get_ticks() < 22000:
 				time_check += 400
 			else:
-				time_check += 200
+				time_check += 150
 
 
 
@@ -227,30 +227,30 @@ while not gameExit:
 		else:
 			enemy_time_check += 2000
 
-	# give lives back to players as they collect more points
+	# give health back to players as they collect more points
 	if player.points == 5:
 		if update_life_1:
-			player.lives += 1
+			player.health += 1
 			update_life_1 = False
 	elif player.points == 10:
 		if update_life_2:
-			player.lives += 2
+			player.health += 2
 			update_life_2 = False
 	elif player.points == 15:
 		if update_life_3:
-			player.lives += 3
+			player.health += 3
 			update_life_3 = False
 	elif player.points == 20:
 		if update_life_4:
-			player.lives += 5
+			player.health += 5
 			update_life_4 = False
 	elif player.points == 25:
 		if update_life_5:
-			player.lives += 10
+			player.health += 10
 			update_life_5 = False
 
 	# run game over stuff
-	if player.lives <= 0:
+	if player.health <= 0:
 		print("game over!!!")
 		print(player.points)
 		gameExit = True
@@ -266,12 +266,12 @@ while not gameExit:
 		else:
 			gameExit = True
 
-	# show number of seconds elapsed, number of lives, and number of points
-	if player.lives > 0:
+	# show number of seconds elapsed, number of health, and number of points
+	if player.health > 0:
 		time_text = f.render("Time Elapsed: " + str(pygame.time.get_ticks() / 1000), False, black)
 		gameDisplay.blit(time_text, (120, 0))
-		lives_text = f.render("Current Lives: " + str(player.lives), False, black)
-		gameDisplay.blit(lives_text, (350, 0))
+		health_text = f.render("Current Health: " + str(player.health), False, black)
+		gameDisplay.blit(health_text, (350, 0))
 		points_text = f.render("Points: " + str(player.points), False, black)
 		gameDisplay.blit(points_text, (550, 0))
 
@@ -297,19 +297,19 @@ while not gameExit:
 	# things start to get crazy
 	# flashing lights mode haha
 	elif pygame.time.get_ticks() < 90000:
-		if pygame.time.get_ticks() % 4 == 0:
+		if pygame.time.get_ticks() % 10 == 0:
 			for bad_block in bad_block_list:
 				pygame.draw.rect(gameDisplay, violet, bad_block.rect)
 		else:
 			for bad_block in bad_block_list:
 				pygame.draw.rect(gameDisplay, aqua, bad_block.rect)
 	else:
-		if pygame.time.get_ticks() % 4 == 0:
-			for bad_block in bad_block_list:
-				pygame.draw.rect(gameDisplay, violet, bad_block.rect)
-		else:
+		if pygame.time.get_ticks() % 10 == 0:
 			for bad_block in bad_block_list:
 				pygame.draw.rect(gameDisplay, green, bad_block.rect)
+		else:
+			for bad_block in bad_block_list:
+				pygame.draw.rect(gameDisplay, violet, bad_block.rect)
 
 
 	pygame.display.update()
@@ -317,12 +317,15 @@ while not gameExit:
 
 
 # once game is over
-gameDisplay.fill(white)
-myfont = pygame.font.SysFont("monospace", 50)
-credits = myfont.render("GAME OVER!", 1, black)
-gameDisplay.blit(credits, (370, 360))
-while credits_timer:
-	credits_timer -= 1
+
+# this currently doesn't work the way i want it to 
+
+# while credits_timer:
+# 	gameDisplay.fill(white)
+# 	myfont = pygame.font.SysFont("monospace", 50)
+# 	credits = myfont.render("GAME OVER!", 1, black)
+# 	gameDisplay.blit(credits, (370, 360))
+# 	credits_timer -= 1
 
 #required
 pygame.quit()
