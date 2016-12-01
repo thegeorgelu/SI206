@@ -13,10 +13,14 @@ black = (0,0,0)
 red = (255, 0, 0)
 green = (0, 255, 0)
 blue = (0, 0, 255)
+
 violet = (238, 130, 238)
 medium_violet = (219, 112, 147)
 violet_red = (208, 32, 144)
+
 aqua = (127, 255, 212)
+saddle_brown = (139, 69, 19)
+maroon = (176, 48, 96)
 
 #position update vars
 x_delta = 0
@@ -159,11 +163,11 @@ while not gameExit:
 	player.rect.y += y_delta
 	if player.rect.x < 0:
 		player.rect.x = display_width - 20
-	elif player.rect.x > display_width:
+	elif player.rect.x > display_width - 20:
 		player.rect.x = 0
 	if player.rect.y < 0:
 		player.rect.y = display_height - 20
-	elif player.rect.y > display_height:
+	elif player.rect.y > display_height - 20:
 		player.rect.y = 0
 
 	# check if player collides with a bad block
@@ -278,7 +282,7 @@ while not gameExit:
 	enemies.update()
 	enemies.draw(gameDisplay)
 	pygame.draw.rect(gameDisplay, blue, player.rect)
-	pygame.draw.rect(gameDisplay, green, prize.rect)
+	pygame.draw.rect(gameDisplay, saddle_brown, prize.rect)
 
 	# color of bad_blocks gets more and more red as time goes on
 	# and then things start getting crazy
@@ -299,17 +303,24 @@ while not gameExit:
 	elif pygame.time.get_ticks() < 90000:
 		if pygame.time.get_ticks() % 10 == 0:
 			for bad_block in bad_block_list:
-				pygame.draw.rect(gameDisplay, violet, bad_block.rect)
+				pygame.draw.rect(gameDisplay, saddle_brown, bad_block.rect)
 		else:
 			for bad_block in bad_block_list:
-				pygame.draw.rect(gameDisplay, aqua, bad_block.rect)
+				pygame.draw.rect(gameDisplay, black, bad_block.rect)
+	# elif pygame.time.get_ticks() < 120000:
+	# 	if pygame.time.get_ticks() % 10 == 0:
+	# 		for bad_block in bad_block_list:
+	# 			pygame.draw.rect(gameDisplay, saddle_brown, bad_block.rect)
+	# 	else:
+	# 		for bad_block in bad_block_list:
+	# 			pygame.draw.rect(gameDisplay, black, bad_block.rect)
 	else:
-		if pygame.time.get_ticks() % 10 == 0:
+		if pygame.time.get_ticks() % 8 == 0:
 			for bad_block in bad_block_list:
-				pygame.draw.rect(gameDisplay, green, bad_block.rect)
+				pygame.draw.rect(gameDisplay, black, bad_block.rect)
 		else:
 			for bad_block in bad_block_list:
-				pygame.draw.rect(gameDisplay, violet, bad_block.rect)
+				pygame.draw.rect(gameDisplay, saddle_brown, bad_block.rect)
 
 
 	pygame.display.update()
