@@ -296,6 +296,14 @@ def main():
 			points_text = f.render("Points: " + str(player.points), False, black)
 			gameDisplay.blit(points_text, (550, 0))
 
+		# beginning instructions for the player
+		if pygame.time.get_ticks() < 4000:
+			grab_text = f.render("GRAB!", False, black)
+			gameDisplay.blit(grab_text, (180, 370))
+			avoid_text = f.render("AVOID!", False, black)
+			gameDisplay.blit(avoid_text, (370, 150))
+			gameDisplay.blit(avoid_text, (580, 370))
+
 		enemies.update()
 		enemies.draw(gameDisplay)
 		pygame.draw.rect(gameDisplay, blue, player.rect)
