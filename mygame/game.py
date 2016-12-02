@@ -4,6 +4,10 @@ from pygame.sprite import *
 from random import *
 import math
 
+easy_mode_flag = True
+flashing_mode_flag = True
+current_high_score = 2
+
 # RGB colors
 white = (255,255,255)
 black = (0,0,0)
@@ -34,7 +38,7 @@ class Player(Sprite):
 		self.width = 20
 		self.rect = pygame.Rect(self.x_pos, self.y_pos, self.length, self.width)
 
-		self.health = 15
+		self.health = 10
 		self.points = 0
 		self.last_point_received = 0
 
@@ -98,8 +102,6 @@ class Enemy(Sprite):
 
 def main():
 	pygame.init();
-	easy_mode_flag = True
-	flashing_mode_flag = True
 
 	#position update vars
 	x_delta = 0
@@ -192,7 +194,9 @@ def main():
 				print("collision with bad block!")
 				mixer.Sound("badblockhit.wav").play()
 				bad_block.move()
-				prize.move() # TROLL
+				# possible gameplay adjustment
+				# if pygame.time.get_ticks() < 60000:
+				# 	prize.move() # TROLL
 				player.health -= 1
 
 		# check if player collides with the prize
@@ -337,15 +341,20 @@ def main():
 	print("game over!!!")
 	print(player.points)
 
+	# show the end game credits
 	if credits_timer > 0:
 		gameDisplay.fill(white)
 		myfont = pygame.font.SysFont("monospace", 50)
 		credits = myfont.render("GAME OVER!", 1, black)
 		gameDisplay.blit(credits, (300, 300))
-		time_survived = myfont.render("Time Survived: " + str(time_survived), 1, black)
-		gameDisplay.blit(time_survived, (240, 330))
-		end_points = myfont.render("Total Points: " + str(end_points), 1, black)
-		gameDisplay.blit(end_points, (280, 360))
+		time_survived_text = myfont.render("Time Survived: " + str(time_survived), 1, black)
+		gameDisplay.blit(time_survived_text, (240, 330))
+		end_points_text = myfont.render("Total Points: " + str(end_points), 1, black)
+		gameDisplay.blit(end_points_text, (280, 360))
+		# show the high score if it is a new high score
+		if end_points > current_high_score:
+			new_high_score_text = myfont.render("NEW HIGH SCORE: " + str(end_points), 1, black)
+			gameDisplay.blit(new_high_score_text, (220, 390))
 		pygame.display.update()
 		clock.tick(30)
 		credits_timer -= 1
