@@ -4,9 +4,11 @@ from pygame.sprite import *
 from random import *
 import math
 
+# can modify game features accordingly
+# in the future will allow user to choose which settings in the game itself for better user experience!
 easy_mode_flag = True
 flashing_mode_flag = True
-current_high_score = 2
+current_high_score = 40
 
 # RGB colors
 white = (255,255,255)
@@ -169,6 +171,8 @@ def main():
 					y_delta += 10
 				if event.key == pygame.K_1:
 					prize.move()
+				# how do i fix the press any other key to stop the block from moving?
+					
 
 			# working fine for now (with the poop.bmp)
 			if player.check_collision(player, enemy):
@@ -197,6 +201,9 @@ def main():
 				# possible gameplay adjustment
 				# if pygame.time.get_ticks() < 60000:
 				# 	prize.move() # TROLL
+
+				# other possible gameplay adjustment
+				prize.move()
 				player.health -= 1
 
 		# check if player collides with the prize
@@ -226,9 +233,11 @@ def main():
 				elif pygame.time.get_ticks() < 60000:
 					time_check += 1000
 				elif pygame.time.get_ticks() < 90000:
-					time_check += 600
+					time_check += 500
+				elif pygame.time.get_ticks() < 120000:
+					time_check += 150
 				else:
-					time_check += 300
+					time_check += 50
 			# hard mode
 			else:
 				if pygame.time.get_ticks() < 10000:
@@ -240,7 +249,7 @@ def main():
 				elif pygame.time.get_ticks() < 60000:
 					time_check += 200
 				else:
-					time_check += 100
+					time_check += 50
 
 		# moves the enemy faster and faster
 		if pygame.time.get_ticks() > enemy_time_check:
@@ -255,17 +264,13 @@ def main():
 				enemy_time_check += 2000
 
 		# give health back to players as they collect more points
-		if player.points == 5:
+		if player.points == 10:
 			if update_life_1:
 				player.health += 1
 				update_life_1 = False
-		elif player.points == 10:
-			if update_life_2:
-				player.health += 2
-				update_life_2 = False
 		elif player.points == 15:
 			if update_life_3:
-				player.health += 3
+				player.health += 2
 				update_life_3 = False
 		elif player.points == 20:
 			if update_life_4:
@@ -322,13 +327,20 @@ def main():
 				else:
 					for bad_block in bad_block_list:
 						pygame.draw.rect(gameDisplay, black, bad_block.rect)
-			else:
+			elif pygame.time.get_ticks() < 120000:
 				if pygame.time.get_ticks() % 8 == 0:
 					for bad_block in bad_block_list:
 						pygame.draw.rect(gameDisplay, black, bad_block.rect)
 				else:
 					for bad_block in bad_block_list:
 						pygame.draw.rect(gameDisplay, yellow_green, bad_block.rect)
+			else:
+				if pygame.time.get_ticks() % 6 == 0:
+					for bad_block in bad_block_list:
+						pygame.draw.rect(gameDisplay, black, bad_block.rect)
+				else:
+					for bad_block in bad_block_list:
+						pygame.draw.rect(gameDisplay, forest_green, bad_block.rect)
 		if late_game_color_blocks_switch and not flashing_mode_flag and pygame.time.get_ticks() > 60000:
 			for bad_block in bad_block_list:
 				pygame.draw.rect(gameDisplay, black, bad_block.rect)
@@ -352,9 +364,13 @@ def main():
 		end_points_text = myfont.render("Total Points: " + str(end_points), 1, black)
 		gameDisplay.blit(end_points_text, (280, 360))
 		# show the high score if it is a new high score
-		if end_points > current_high_score:
+		if end_points < current_high_score:
+			current_high_score_text = myfont.render("CURRENT HIGH SCORE: " + str(current_high_score), 1, black)
+			gameDisplay.blit(current_high_score_text, (200, 390))
+		else:
 			new_high_score_text = myfont.render("NEW HIGH SCORE: " + str(end_points), 1, black)
 			gameDisplay.blit(new_high_score_text, (220, 390))
+
 		pygame.display.update()
 		clock.tick(30)
 		credits_timer -= 1
