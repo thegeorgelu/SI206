@@ -70,6 +70,7 @@ class BadBlock(Sprite):
 			randX = (randint(20, display_width - 20) // 20) * 20
 			randY= (randint(20, display_height - 20) // 20) * 20
 		self.rect.center = (randX, randY)
+		# pygame.Rect.move(randX, randY)
 
 class Prize(Sprite):
 	def __init__(self):
@@ -87,6 +88,12 @@ class Prize(Sprite):
 			randX = (randint(20, display_width - 20) // 20) * 20
 			randY= (randint(20, display_height - 20) // 20) * 20
 		self.rect.center = (randX, randY)
+
+	def check_collision(self, sprite1, sprite2):
+		col = pygame.sprite.collide_rect(sprite1, sprite2)
+		if col == True:
+			return True
+		return False
 
 class Enemy(Sprite):
 	def __init__(self):
@@ -171,8 +178,6 @@ def main():
 					y_delta += 10
 				if event.key == pygame.K_1:
 					prize.move()
-				# how do i fix the press any other key to stop the block from moving?
-					
 
 			# working fine for now (with the poop.bmp)
 			if player.check_collision(player, enemy):
@@ -203,8 +208,13 @@ def main():
 				# 	prize.move() # TROLL
 
 				# other possible gameplay adjustment
-				prize.move()
+				# prize.move()
 				player.health -= 1
+
+		# this continually tries to put the prize somewhere where there isn't a bad block
+		for bad_block in bad_block_list:
+			if prize.check_collision(prize, bad_block):
+				prize.move()
 
 		# check if player collides with the prize
 		if player.check_collision(player, prize):
@@ -233,9 +243,9 @@ def main():
 				elif pygame.time.get_ticks() < 60000:
 					time_check += 1000
 				elif pygame.time.get_ticks() < 90000:
-					time_check += 500
+					time_check += 400
 				elif pygame.time.get_ticks() < 120000:
-					time_check += 150
+					time_check += 100
 				else:
 					time_check += 50
 			# hard mode
@@ -249,19 +259,19 @@ def main():
 				elif pygame.time.get_ticks() < 60000:
 					time_check += 200
 				else:
-					time_check += 50
+					time_check += 20
 
 		# moves the enemy faster and faster
 		if pygame.time.get_ticks() > enemy_time_check:
 			enemy.move()
 			if pygame.time.get_ticks() < 10000:
-				enemy_time_check += 8000
-			elif pygame.time.get_ticks() < 26000:
 				enemy_time_check += 6000
-			elif pygame.time.get_ticks() < 40000:
+			elif pygame.time.get_ticks() < 28000:
 				enemy_time_check += 4000
-			else:
+			elif pygame.time.get_ticks() < 40000:
 				enemy_time_check += 2000
+			else:
+				enemy_time_check += 1000
 
 		# give health back to players as they collect more points
 		if player.points == 10:
@@ -297,7 +307,7 @@ def main():
 			gameDisplay.blit(points_text, (550, 0))
 
 		# beginning instructions for the player
-		if pygame.time.get_ticks() < 4000:
+		if pygame.time.get_ticks() < 5000:
 			grab_text = f.render("GRAB!", False, black)
 			gameDisplay.blit(grab_text, (180, 370))
 			avoid_text = f.render("AVOID!", False, black)
@@ -336,14 +346,14 @@ def main():
 					for bad_block in bad_block_list:
 						pygame.draw.rect(gameDisplay, black, bad_block.rect)
 			elif pygame.time.get_ticks() < 120000:
-				if pygame.time.get_ticks() % 8 == 0:
+				if pygame.time.get_ticks() % 10 == 0:
 					for bad_block in bad_block_list:
 						pygame.draw.rect(gameDisplay, black, bad_block.rect)
 				else:
 					for bad_block in bad_block_list:
 						pygame.draw.rect(gameDisplay, yellow_green, bad_block.rect)
 			else:
-				if pygame.time.get_ticks() % 6 == 0:
+				if pygame.time.get_ticks() % 8 == 0:
 					for bad_block in bad_block_list:
 						pygame.draw.rect(gameDisplay, black, bad_block.rect)
 				else:
@@ -360,6 +370,8 @@ def main():
 
 	print("game over!!!")
 	print(player.points)
+
+	# happens after the while loop terminates
 
 	# show the end game credits
 	if credits_timer > 0:
