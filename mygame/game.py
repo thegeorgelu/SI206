@@ -397,7 +397,7 @@ def main():
 	else:
 		pygame.quit()
 		quit() # does this exit correctly?
-		sys.exit()
+		sys.exit() # just trying a bunch of quitting things
 
 
 if __name__ == '__main__':
