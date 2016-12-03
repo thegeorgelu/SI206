@@ -70,7 +70,12 @@ class BadBlock(Sprite):
 			randX = (randint(20, display_width - 20) // 20) * 20
 			randY= (randint(20, display_height - 20) // 20) * 20
 		self.rect.center = (randX, randY)
-		# pygame.Rect.move(randX, randY)
+
+	def check_collision(self, sprite1, sprite2):
+		col = pygame.sprite.collide_rect(sprite1, sprite2)
+		if col == True:
+			return True
+		return False
 
 class Prize(Sprite):
 	def __init__(self):
@@ -229,7 +234,7 @@ def main():
 			temp_bad_block = BadBlock()
 			temp_bad_block.rect.x = (randint(20, display_width - 20) // 20) * 20 # this should be rounding to multiples of 20 correctly
 			temp_bad_block.rect.y = (randint(20, display_height - 20) // 20) * 20
-			while temp_bad_block.rect.x >= 120 and temp_bad_block.rect.x <= 650 and temp_bad_block.rect.y <= 20:
+			while temp_bad_block.rect.x >= 120 and temp_bad_block.rect.x <= 650 and temp_bad_block.rect.y <= 20 or temp_bad_block.check_collision(temp_bad_block, prize):
 				temp_bad_block.rect.x = (randint(20, display_width - 20) // 20) * 20
 				temp_bad_block.rect.y = (randint(20, display_height - 20) // 20) * 20
 			bad_block_list.append(temp_bad_block)
